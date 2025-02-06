@@ -1,59 +1,140 @@
-# DemoNestedExpandableTable
+# Angular Material Nested Table Demo
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.0.7.
+![Capture d'écran 2025-02-06 161811](https://github.com/user-attachments/assets/dd3d5efc-c1a2-43f4-a940-8beb426707b4)
 
-## Development server
+A demonstration of an expandable nested table using Angular Material with full CRUD operations, automatic updates, and a mock backend service.
 
-To start a local development server, run:
+## Features
+
+- Expandable rows with inline editing
+- Material table with pagination and sorting
+- Real-time table updates on:
+  - Create new product
+  - Edit existing product
+  - Cancel operations
+- Status-based styling with color indicators
+- Responsive design for different screen sizes
+- Mock backend service for testing
+
+## Project Structure
+
+```
+app/
+├── components/
+│   └── product/
+│       ├── product-create/      # Create product modal
+│       └── product-table/       # Main table component
+├── library/
+│   └── shared/
+│       ├── enum/               # Status enums
+│       ├── interface/          # Type definitions
+│       ├── nested-table/       # Base table functionality
+│       └── form-abstract/      # Form base classes
+├── services/
+│   ├── product/               # Product CRUD service
+│   └── baseCRUD.service.ts    # Base service interface
+└── styles/                    # Shared styles
+```
+
+## Getting Started
+
+1. Install dependencies:
+
+```bash
+npm install @angular/material @angular/cdk ngx-toastr
+```
+
+2. Import required modules in your app.module.ts:
+
+```typescript
+import { MatTableModule } from "@angular/material/table";
+import { MatPaginatorModule } from "@angular/material/paginator";
+import { MatSortModule } from "@angular/material/sort";
+import { ToastrModule } from "ngx-toastr";
+```
+
+## Key Components
+
+### ProductTableComponent
+
+The main table component that extends the base nested table functionality:
+
+- Handles expandable rows for inline editing
+- Implements sorting and pagination
+- Manages real-time updates on CRUD operations
+- Provides responsive column display
+
+### ProductCreateComponent
+
+Modal component for creating new products:
+
+- Form validation
+- Status selection
+- Auto-refresh on successful creation
+
+## State Management
+
+The table uses EditStateService for managing edit states:
+
+- Tracks expanded/collapsed states
+- Handles edit mode toggling
+- Manages form state during edits
+
+## Automatic Updates
+
+The table automatically refreshes in these scenarios:
+
+1. After create operation:
+
+```typescript
+dialogRef.afterClosed().subscribe(() => {
+  this.loadTable();
+});
+```
+
+2. After cancel operation:
+
+```typescript
+async _processAnnule(element: T) {
+  await this._processReload(element);
+  this._toggleExpand(element);
+}
+```
+
+3. After edit operation:
+
+```typescript
+async _save(element: T) {
+  if (await this.aliasService.update(this.currentEditElement()!)) {
+    this._viewMode();
+  }
+}
+```
+
+## Styling
+
+The project includes dedicated SCSS files for:
+
+- Table styles (nested-table.scss)
+- Form styles (form.scss)
+- Filter bar styles (filter-bar.scss)
+- Responsive layouts
+
+## Service Layer
+
+Uses a mock service (ProductService) that simulates backend operations with:
+
+- Pagination
+- Filtering
+- Sorting
+- CRUD operations
+
+## Development
+
+To start the development server:
 
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Navigate to `http://localhost:2900/`
