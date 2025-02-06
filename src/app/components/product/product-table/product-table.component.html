@@ -1,0 +1,273 @@
+<!-- data-table.component.html -->
+
+<div class="container mx-auto p-4">
+  <div
+    class="filters-container fill flex flex-row justify-center items-center px-4 r"
+  >
+    <mat-toolbar
+      class="flex fill border flex-row justify-start items-center gap-6 shadow-md"
+    >
+      <mat-form-field
+        class="filter-table fill w-full"
+        subscriptSizing="dynamic"
+      >
+        <mat-label>Filtrer</mat-label>
+        <input
+          autocomplete="off"
+          [(ngModel)]="filter"
+          matInput
+          (keyup)="searchSubject.next(filter)"
+          placeholder="Find by name, description, status"
+        />
+      </mat-form-field>
+
+      <button
+        mat-fab
+        class="create-element flex flex-row justify-center items-center"
+        extended
+        (click)="openDialogCreate()"
+      >
+        <mat-icon>add</mat-icon>
+        <div class="hidden sm:flex ml-2">Create</div>
+      </button>
+    </mat-toolbar>
+  </div>
+  <!-- Table Container -->
+  <div class="bg-white rounded-lg shadow-md overflow-hidden relative">
+    <div *ngIf="isLoading$S()" class="loading-overlay">
+      <mat-spinner></mat-spinner>
+    </div>
+    <table
+      mat-table
+      [dataSource]="dataSource"
+      [matSortActive]="sortField"
+      [matSortDirection]="sortDirection"
+      (matSortChange)="onSortChange($event)"
+      matSort
+      multiTemplateDataRows
+      class="w-full"
+    >
+      <!-- Dynamic Columns -->
+      <ng-container
+        *ngFor="let column of columnsToDisplay"
+        [matColumnDef]="column"
+      >
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          class="px-6 py-3 bg-gray-50"
+        >
+          <div class="flex items-center space-x-1">
+            <span>{{ convertColumnToStr(column) }}</span>
+          </div>
+        </th>
+        <td mat-cell *matCellDef="let element" class="px-6">
+          <!-- Status Column Special Handling -->
+          <ng-container *ngIf="column === 'status'; else defaultCell">
+            <span
+              [ngClass]="{
+                'px-3 text-sm font-medium rounded-full': true,
+                'bg-green-100 text-green-800': element[column] === 'Active',
+                'bg-red-100 text-red-800': element[column] === 'Inactive',
+                'bg-yellow-100 text-yellow-800': element[column] === 'Pending',
+                'bg-gray-100 text-gray-800': element[column] === 'Archived'
+              }"
+            >
+              {{ element[column] }}
+            </span>
+          </ng-container>
+
+          <ng-template #defaultCell>
+            <ng-container [ngSwitch]="column">
+              <span *ngSwitchCase="'createdAt'">{{
+                element[column] | date : "HH:mm dd/MM/yyyy" : "UTC" : "fr-FR"
+              }}</span>
+              <span *ngSwitchCase="'updatedAt'">{{
+                element[column] | date : "HH:mm dd/MM/yyyy" : "UTC" : "fr-FR"
+              }}</span>
+              <span *ngSwitchDefault>{{
+                _getPropertyByPath(element, column)
+              }}</span>
+            </ng-container>
+          </ng-template>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="Actions">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          class="px-6 bg-gray-50 text-left text-sm font-medium text-gray-700"
+        >
+          {{ convertColumnToStr("Actions") }}
+        </th>
+        <td
+          mat-cell
+          *matCellDef="let element"
+          class="px-6 whitespace-nowrap text-right text-sm"
+        >
+          <button
+            mat-icon-button
+            (click)="_toggleExpand(element)"
+            class="text-gray-600 hover:text-gray-900 focus:outline-none"
+          >
+            <mat-icon>
+              {{
+                currentEditElement()?.id === element.id
+                  ? "expand_less"
+                  : "expand_more"
+              }}
+            </mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <!-- Expanded Detail Column -->
+      <ng-container matColumnDef="expandedDetail">
+        <td
+          mat-cell
+          *matCellDef="let element"
+          [attr.colspan]="columnsToDisplay.length + 1"
+          class="p-0"
+        >
+          <div
+            class="bg-gray-50"
+            [@detailExpand]="
+              element.id === currentEditElement()?.id ? 'expanded' : 'collapsed'
+            "
+          >
+            <!-- Expanded Form Content -->
+            <form
+              *ngIf="element.id === currentEditElement()?.id"
+              [formGroup]="form"
+              class="p-6 space-y-6"
+            >
+              <!-- Form Fields -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <mat-form-field class="w-full">
+                  <mat-label>Name</mat-label>
+                  <input matInput formControlName="name" />
+                </mat-form-field>
+
+                <mat-form-field class="w-full">
+                  <mat-label>Description</mat-label>
+                  <textarea
+                    matInput
+                    formControlName="description"
+                    rows="3"
+                  ></textarea>
+                </mat-form-field>
+
+                <mat-form-field class="w-full">
+                  <mat-label>Status</mat-label>
+                  <mat-select formControlName="status">
+                    @for (status of IOption__Product_Status; track status.key) {
+                    <mat-option [value]="status.key">
+                      {{ status.label }}
+                    </mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <!-- Form Actions -->
+              <div
+                class="actions-list flex flex-row justify-center items-center p-4"
+              >
+                <button
+                  class="m-2 cancel-button"
+                  *ngIf="!_isEdit()"
+                  mat-raised-button
+                  color="basic"
+                  type="button"
+                  (click)="_processClose()"
+                >
+                  Annuler
+                </button>
+                @if(canEdit(currentEditElement()!, element) && !_isEdit()){
+                <button
+                  class="m-2 edit-button"
+                  mat-raised-button
+                  color="primary"
+                  (click)="_processEdit(element)"
+                >
+                  Modifier
+                </button>
+                }
+                <button
+                  class="m-2 cancel-button"
+                  *ngIf="_isEdit()"
+                  mat-raised-button
+                  color="basic"
+                  (click)="_processAnnule(element)"
+                >
+                  Annuler
+                </button>
+                <button
+                  class="m-2 save-button"
+                  *ngIf="_isEdit()"
+                  mat-raised-button
+                  [disabled]="form.invalid"
+                  color="primary"
+                  (click)="_save(element)"
+                >
+                  Enregistrer
+                </button>
+                <button
+                  class="m-2 delete-button"
+                  *ngIf="_isEdit()"
+                  mat-raised-button
+                  [disabled]="form.invalid"
+                  color="warn"
+                  (click)="_deleteRow(element)"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+              @if(_testView$S()){
+              <br />form<br />
+              <pre
+                style="
+                  margin-top: 50px;
+                  border: 1px solid blue;
+                  width: 100%;
+                  white-space: pre-wrap;
+                "
+              >
+                   {{ form.value | json }}   </pre
+              >
+              }
+            </form>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Table Rows -->
+      <tr
+        mat-header-row
+        *matHeaderRowDef="columnsToDisplay.concat(['Actions'])"
+      ></tr>
+      <tr
+        mat-row
+        *matRowDef="let element; columns: columnsToDisplay.concat(['Actions'])"
+        class="hover:bg-gray-50 transition-colors cursor-pointer"
+        [class.bg-gray-100]="element.id === currentEditElement()?.id"
+      ></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: ['expandedDetail']"
+        [class.hidden]="row.id !== currentEditElement()?.id"
+      ></tr>
+    </table>
+
+    <!-- Paginator -->
+    <mat-paginator
+      [pageSize]="10"
+      [pageSizeOptions]="[5, 10, 25, 100]"
+      [length]="totalCount"
+      showFirstLastButtons
+    ></mat-paginator>
+  </div>
+</div>

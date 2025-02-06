@@ -1,0 +1,9 @@
+.loading-overlay {
+  position: absolute;
+  inset: 0; // This replaces top/right/bottom/left: 0
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

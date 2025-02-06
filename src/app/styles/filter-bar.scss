@@ -1,0 +1,55 @@
+.filters-container {
+  width: 100%;
+  mat-toolbar {
+    width: 98%;
+    height: 65px;
+    border-color: #aebdba;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    background: linear-gradient(70deg, #e6f4f1 0%, #e9fdff 100%);
+
+    .create-element {
+      background: linear-gradient(
+        70deg,
+        rgb(34, 97, 130) 0%,
+        rgb(76, 172, 185) 100%
+      );
+      mat-icon {
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
+    }
+  }
+}
+
+/* Cacher les colonnes email et description sur les petits écrans */
+@media (max-width: 768px) {
+  .filters-container {
+    mat-toolbar {
+      .create-element {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        mat-icon {
+          font-size: 18px;
+          // width: 100%;
+        }
+      }
+    }
+  }
+}
+
+mat-icon {
+  margin-right: 8px; /* Ajuste l'espacement entre l'icône et le texte */
+}
+mat-option {
+  font-size: x-small !important;
+
+  @media (min-width: 768px) {
+    /* Adjust media query as per your breakpoints */
+    font-size: medium !important;
+  }
+}

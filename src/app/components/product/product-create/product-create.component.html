@@ -1,0 +1,91 @@
+<div class="relative">
+  <!-- Add relative here -->
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    @if(isLoading$S()){
+    <div class="loading-overlay">
+      <mat-spinner></mat-spinner>
+    </div>
+    }
+    <div
+      #expandedRow
+      class="modal-form mx-auto flex flex-col justify-center items-center p-2 sm:p-0 md:p-5 w-full"
+    >
+      <h2 class="mt-10 mb-5 font-semibold">New Product</h2>
+      <mat-card
+        [ngClass]="{
+          'mat-card-active': _isEdit === true,
+          'mat-card-inactive': _isEdit === false
+        }"
+        class="w-full mx-auto justify-center items-center"
+      >
+        <mat-card-content class="mx-auto flex flex-col w-full">
+          <div
+            class="mt-2 grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-1 gap-y-5 sm:gap-x-2 sm:gap-y-6 md:gap-x-3 md:gap-y-8 lg:gap-x-5 lg:gap-y-10"
+          >
+            <mat-form-field class="w-full">
+              <mat-label>Name</mat-label>
+              <input matInput formControlName="name" />
+            </mat-form-field>
+
+            <mat-form-field class="w-full">
+              <mat-label>Description</mat-label>
+              <textarea
+                matInput
+                formControlName="description"
+                rows="3"
+              ></textarea>
+            </mat-form-field>
+
+            <mat-form-field class="w-full">
+              <mat-label>Status</mat-label>
+              <mat-select formControlName="status">
+                @for (status of IOption__Product_Status; track status.key) {
+                <mat-option [value]="status.key">
+                  {{ status.label }}
+                </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </form>
+
+  <mat-dialog-actions
+    class="modal-actions flex flex-row justify-center items-center"
+  >
+    <button
+      class="m-2 cancel-button"
+      *ngIf="_isEdit"
+      mat-raised-button
+      color="basic"
+      (click)="onNoClick()"
+    >
+      Annuler
+    </button>
+    <button
+      class="m-2 save-button"
+      *ngIf="_isEdit"
+      mat-raised-button
+      [disabled]="form.invalid || isSubmitting"
+      color="primary"
+      (click)="onSubmit()"
+    >
+      Enregistrer
+    </button>
+  </mat-dialog-actions>
+  @if(_testView$S()){
+  <br />form<br />
+  <pre
+    style="
+      margin-top: 50px;
+      border: 1px solid blue;
+      width: 100%;
+      white-space: pre-wrap;
+    "
+  >
+ {{ form.value | json }}   </pre
+  >
+  }
+</div>

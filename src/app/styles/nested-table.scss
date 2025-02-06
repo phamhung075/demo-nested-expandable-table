@@ -1,0 +1,31 @@
+.table-container {
+  height: 100%;
+  width: 100%;
+}
+
+table {
+  width: 100%;
+  overflow-x: auto;
+  table-layout: fixed;
+}
+
+th {
+  font-size: 1.125rem;
+  color: #def6ef;
+  background-color: #3e8db4 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+tr {
+  font-size: 1rem;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
